@@ -9,6 +9,8 @@
     <meta name="description" content="">
     <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
     <meta name="generator" content="Jekyll v4.0.1">
+    <link rel="stylesheet" type="text/css" href="public/css/ecommerce.css">
+    
     <title>Dashboard Template · Bootstrap</title>
 
 
@@ -157,15 +159,15 @@
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">
+            <a class="nav-link" href="{{ route('produits.index') }}">
               <span data-feather="file"></span>
-              Orders
+              Produit(s)
             </a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="#">
               <span data-feather="shopping-cart"></span>
-              Products
+              Utilisateur(s)
             </a>
           </li>
           <li class="nav-item">

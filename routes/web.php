@@ -11,13 +11,17 @@
 |
 */
 
+use App\Http\Middleware\Admin;
+
 Route::get('/', function () {
     return view('welcome');
 });
 
 /* Admin Routes */
-Route::get('/admin', 'AdminProfileController@index' )->name('admin.index');
-
+Route::group(['middleware' => ['auth']], function () {
+Route::get('/produits', 'AdminProfileController@index')->name('produits.index');
+Route::delete('/delete/{Id}', 'AdminProfileController@destroy')->name('produits.destroy');
+});
 /* Product Routes */
 Route::get('/boutique', 'ProductController@index')->name('products.index');
 Route::get('/boutique/{slug}', 'ProductController@show')->name('products.show');
