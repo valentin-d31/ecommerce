@@ -189,7 +189,8 @@
                     <a class="text-muted" href="{{ route('cart.index') }}">Panier<span
                             class="badge badge-pill badge-dark">{{ Cart::count()}}</ </span> </a> </div> <div
                                 class="col-4 text-center">
-                            <a class="blog-header-logo text-dark" href="{{ route('products.index')}}">🤦‍E-Commerce🏂</a>
+                            <a class="blog-header-logo text-dark" href="{{ route('products.index')}}">‍🦊futfut meuble🤦</a>
+                            <h7>'futé  évide-meublement'</h7>
                 </div>
                 <div class="col-4 d-flex justify-content-end align-items-center">
                     @include('partials.search')
@@ -234,7 +235,7 @@
     {{--<!-- /.container --> --}}
 
     <footer class="blog-footer">
-        <p>E-Commerce</a> by Martin Meyer 😓 & Valentin Arpin 😇</a>.</p>
+        <p>E-Commerce</a> by Timothée Cognard 🦍 & Valentin Arpin 😇</a>.</p>
         <p>
             <a href="#">Back to top</a>
         </p>

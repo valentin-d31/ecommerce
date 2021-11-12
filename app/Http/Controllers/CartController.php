@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Coupon;
 use App\Product;
 use Gloudemans\Shoppingcart\Facades\Cart;
 use Illuminate\Http\Request;
@@ -54,6 +54,24 @@ class CartController extends Controller
         return redirect()->route('products.index')->with('success', 'Le produit a bien été ajouté.');
     }
 
+
+    public function storeCoupon(Request $request)
+    {
+        $code = $request->get('code');
+
+        $coupon = Coupon::where('code', $code)->first();
+
+        if (!$coupon) {
+            return redirect()->back()->with('error', 'Le coupon est invalide.');
+        }
+
+        $request->session()->put('coupon', [
+            'code' => $coupon->code,
+            'remise' => $coupon->discount(Cart::subtotal())
+        ]);
+
+        return redirect()->back()->with('success', 'Le coupon est appliqué.');
+    }
     /**
      * Display the specified resource.
      *
@@ -96,6 +114,11 @@ class CartController extends Controller
             return response()->json(['error' => 'Cart Quantity Has Not Been Updated']);
         }
 
+        if ($data['qty'] > $data['stock']) {
+            Session::flash('error', 'Il n\'y a plus assez de stock.');
+            return response()->json(['error' => 'Not Enought Product Quantity']);
+        }
+
         Cart::update($rowId, $data['qty']);
 
         Session::flash('success', 'La quantité du produit est passée à ' . $data['qty'] . '.');
@@ -113,5 +136,12 @@ class CartController extends Controller
         Cart::remove($rowId);
 
         return back()->with('success', 'Le produit a été supprimé.');
+    }
+
+    public function destroyCoupon()
+    {
+        request()->session()->forget('coupon');
+
+        return redirect()->back()->with('success', 'Coupon retiré');
     }
 }

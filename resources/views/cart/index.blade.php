@@ -43,7 +43,7 @@
                                     </th>
                                     <td class="border-0 align-middle"><strong>{{ getPrice($product->subtotal()) }}</strong></td>
                                     <td class="border-0 align-middle">
-                                        <select class="custom-select" name="qty" id="qty" data-id="{{ $product->rowId }}">
+                                        <select class="custom-select" name="qty" id="qty" data-id="{{ $product->rowId }}" data-stock="{{ $product->model->stock}}">
                                             @for ($i = 1; $i <= 5; $i++)
                                                 <option value="{{ $i }}" {{ $product->qty == $i ? 'selected' : ''}}>
                                                     {{ $i }}
@@ -70,15 +70,24 @@
                 <div class="col-lg-6">
                     <div class="bg-light rounded-pill px-4 py-3 text-uppercase font-weight-bold">Code coupon
                     </div>
+                    @if (!request()->session()->has('coupon'))
                     <div class="p-4">
                         <p class="font-italic mb-4">Si vous détenez un code Coupon, entrez-le dans le champ ci-dessous</p>
+                    <form action="{{ route('cart.store.coupon') }}" method="POST">
+                        @csrf
                         <div class="input-group mb-4 border rounded-pill p-2">
-                            <input type="text" placeholder="ABC-123" aria-describedby="button-addon3" class="form-control border-0">
+                            <input type="text" placeholder="Entrez votre code ici" name="code" aria-describedby="button-addon3" class="form-control border-0">
                             <div class="input-group-append border-0">
-                                <button id="button-addon3" type="button" class="btn btn-dark px-4 rounded-pill"><i class="fa fa-gift mr-2"></i>Appliquer le coupon</button>
+                                <button id="button-addon3" type="submit" class="btn btn-dark px-4 rounded-pill"><i class="fa fa-gift mr-2"></i>Appliquer le coupon</button>
                             </div>
                         </div>
+                    </form>
                     </div>
+                    @else
+                    <div class="p-4">
+                        <p class="font-italic mb-4">Coupon déjà appliqué.</p>
+                    </div>
+                    @endif
                     <div class="bg-light rounded-pill px-4 py-3 text-uppercase font-weight-bold">Instructions pour le vendeur</div>
                     <div class="p-4">
                         <p class="font-italic mb-4">Si vous souhaitez ajouter des précisions à votre commande, merci de les rentrer dans le champ ci-dessous</p>
@@ -92,11 +101,35 @@
                         <p class="font-italic mb-4">Les frais éventuels de livraison seront calculés suivant les informations que vous avez transmises.</p>
                         <ul class="list-unstyled mb-4">
                         <li class="d-flex justify-content-between py-3 border-bottom"><strong class="text-muted">Sous-total </strong><strong>{{ getPrice(Cart::subtotal()) }}</strong></li>
-                        {{-- <li class="d-flex justify-content-between py-3 border-bottom"><strong class="text-muted">Shipping and handling</strong><strong>$10.00</strong></li> --}}
+                        @if (request()->session()->has('coupon'))
+                        <li class="d-flex justify-content-between py-3 border-bottom"><strong class="text-muted">Coupon {{request ()->session()->get('coupon')['code']}}
+
+                        <form action="{{ route('cart.destroy.coupon') }}" method="POST" class="d-inline-block">
+                         @csrf
+                         @method('DELETE')
+                            <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fa fa-trash"></i></button>
+                        </form>
+
+                        </strong><strong>{{getPrice(request ()->session()->get('coupon')['remise'])}}</strong></li>
+
+                        <li class="d-flex justify-content-between py-3 border-bottom"><strong class="text-muted">Nouveau Sous Total</strong><strong>
+                        {{ getPrice(Cart::subtotal() - request ()->session()->get('coupon')['remise'])}}
+                        </strong></li>
+                        <li class="d-flex justify-content-between py-3 border-bottom"><strong class="text-muted">Taxe</strong><strong>
+                        {{ getPrice((Cart::subtotal() - request ()->session()->get('coupon')['remise']) * (config('cart.tax') / 100))}}
+
+                        </strong></li>
+                        <li class="d-flex justify-content-between py-3 border-bottom"><strong class="text-muted">Total</strong><strong>
+
+                        {{ getPrice((Cart::subtotal() - request ()->session()->get('coupon')['remise']) + (Cart::subtotal() - request ()->session()->get('coupon')['remise']) * (config('cart.tax') / 100)) }}
+                        </strong></li>
+
+                        @else
                         <li class="d-flex justify-content-between py-3 border-bottom"><strong class="text-muted">Taxe</strong><strong>{{ getPrice(Cart::tax()) }}</strong></li>
                         <li class="d-flex justify-content-between py-3 border-bottom"><strong class="text-muted">Total</strong>
                             <h5 class="font-weight-bold">{{ getPrice(Cart::total()) }}</h5>
                         </li>
+                        @endif
                         </ul><a href="{{ route('checkout.index') }}" class="btn btn-dark rounded-pill py-2 btn-block"><i class="fa fa-credit-card" aria-hidden="true"></i> Passer à la caisse</a>
                     </div>
                 </div>
@@ -120,6 +153,7 @@
     Array.from(qty).forEach((element) => {
         element.addEventListener('change', function () {
             var rowId = element.getAttribute('data-id');
+            var stock = element.getAttribute('data-stock');
             var token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
             fetch(`/panier/${rowId}`,
                 {
@@ -131,7 +165,9 @@
                     },
                     method: 'patch',
                     body: JSON.stringify({
-                        qty: this.value
+                        qty: this.value,
+                        stock: stock
+                        
                     })
             }).then((data) => {
                 console.log(data);

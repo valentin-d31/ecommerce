@@ -16,7 +16,7 @@ class Admin
      */
     public function handle($request, Closure $next)
     {
-        if(Auth::user()->hasAnyRole('home')) {
+        if(Auth::user()->role === 'admin') {
             return $next($request);
         }
         return redirect('/boutique');

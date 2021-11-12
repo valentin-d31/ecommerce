@@ -24,7 +24,7 @@
                 <div id="card-errors" role="alert"></div>
 
                 <button class="btn btn-success btn-block mt-3" id="submit">
-                    <i class="fa fa-credit-card" aria-hidden="true"></i> Payer maintenant ({{ getPrice(Cart::total()) }})
+                    <i class="fa fa-credit-card" aria-hidden="true"></i> Payer maintenant ({{ getPrice($total) }})
                 </button>
             </form>
         </div>
@@ -87,7 +87,6 @@
                     var token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
                     var form = document.getElementById('payment-form');
                     var url = form.action;
-                    var redirect = '/merci';
                     fetch(
                         url,
                         {
@@ -102,8 +101,14 @@
                                 paymentIntent: paymentIntent
                             })
                         }).then((data) => {
-                            console.log(data);
-                            form.reset();
+                            if (data.status === 400) {
+                                var redirect = '/boutique';
+
+                            } else {
+                                var redirect = '/merci';
+                            }
+                           // console.log(data);
+                            //form.reset();
                             window.location.href = redirect;
                     }).catch((error) => {
                         console.log(error)
